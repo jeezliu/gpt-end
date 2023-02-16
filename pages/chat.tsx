@@ -70,6 +70,15 @@ export default function Chat() {
       setChatItems([currentChat])
     }
   }
+  const syncChatInChatItems = (chat: ChatItem) => {
+    const index = chatItems.findIndex(item => item.key === chat?.key)
+    if (index !== -1) {
+      chatItems.splice(index, 1, chat)
+      setChatItems([...chatItems])
+    } else {
+      setChatItems([chat])
+    }
+  }
 
   const handleNewChat = () => {
     debugger
@@ -79,7 +88,7 @@ export default function Chat() {
     })
   }
   const handleLabelEditOk = () => {
-    syncCurrentChatInChatItems()
+    syncChatInChatItems(currentChat)
     handleLabelEditCancel()
   }
   const handleLabelEditCancel = () => {
@@ -167,14 +176,13 @@ export default function Chat() {
             })
           }
           // 刷新视图
-          setCurrentChat({
+          const newCurrentChat = {
             ...currentChat,
             conversations
-          })
+          }
+          setCurrentChat(newCurrentChat)
           // 会话成功，同步至对话列表
-          setTimeout(() => {
-            syncCurrentChatInChatItems()
-          }, 0)
+          syncChatInChatItems(newCurrentChat)
         }
       }).catch(() => {
         message.error('请求错误')
