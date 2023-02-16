@@ -68,7 +68,7 @@ export default function Chat() {
       chatItems.splice(index, 1, chat)
       setChatItems([...chatItems])
     } else {
-      setChatItems([chat])
+      setChatItems([...chatItems, chat])
     }
   }
 
@@ -137,7 +137,7 @@ export default function Chat() {
       const conversations = [...currentChat.conversations]
       conversations.push(conversation)
       if (!currentChat.label) { // 选第一问题的问做为标题
-        currentChat.label = prompt.slice(0, 15)
+        currentChat.label = prompt.slice(0, 11)
       }
       setCurrentChat({ // 更新当前对话
         ...currentChat,
