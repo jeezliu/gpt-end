@@ -19,8 +19,10 @@
 .chatList {
   overflow-y: scroll;
 }
-.chatItem {
+.chatItemActionWrap {
   position: relative;
+}
+.chatItem {
   margin-top: 8px;
   margin-bottom: 8px;
   width: 100%;
@@ -47,6 +49,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.actionWrap {
+  position: absolute;
+  right: 12px;
+  top: 13px;
+  color: #fff;
 }
 
 .contentWrap {

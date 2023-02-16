@@ -61,15 +61,7 @@ export default function Chat() {
   const serialize = () => {
     window.localStorage.setItem('chat-cached', JSON.stringify(chatItems))
   }
-  const syncCurrentChatInChatItems = () => {
-    const index = chatItems.findIndex(item => item.key === currentChat?.key)
-    if (index !== -1) {
-      chatItems.splice(index, 1, currentChat)
-      setChatItems([...chatItems])
-    } else {
-      setChatItems([currentChat])
-    }
-  }
+
   const syncChatInChatItems = (chat: ChatItem) => {
     const index = chatItems.findIndex(item => item.key === chat?.key)
     if (index !== -1) {
@@ -97,7 +89,7 @@ export default function Chat() {
 
   const handlChatDel = (item: ChatItem) => {
     const index = chatItems.findIndex(source => source.key === item.key)
-    
+
     if (index !== -1) {
       chatItems.splice(index, 1)
       setChatItems([...chatItems])
@@ -122,7 +114,7 @@ export default function Chat() {
       })
     }
   }
-  
+
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(e.target.value)
   }
@@ -223,15 +215,15 @@ export default function Chat() {
         token: token
       })
     }).then((res) => res.json())
-    .then(res => {
-      if (res.code === 200) {
-        message.success('通过')
-        window.localStorage.setItem('token', token)
-        setTokenModalOpen(false)
-      } else {
-        message.error(res?.error?.message)
-      }
-    })
+      .then(res => {
+        if (res.code === 200) {
+          message.success('通过')
+          window.localStorage.setItem('token', token)
+          setTokenModalOpen(false)
+        } else {
+          message.error(res?.error?.message)
+        }
+      })
   }
 
   return (
@@ -242,50 +234,51 @@ export default function Chat() {
             + New Chat
           </div>
           <div className={styles.chatList}>
-           {chatItems.map(item => (
-            <div
-              key={item.key}
-              className={`${styles.chatItem} ${currentChat.key === item.key ? styles.chatItemSelected : ''}`}
-              onClick={() => setCurrentChat(item)}
-            >
-              <span className={styles.icon}>
-                <Image
-                  src={messagePic}
-                  alt="message"
-                  width={16}
-                  height={16}
-                />
-              </span>
-              <span className={styles.labelWrap}>
-                {currentChat.key === item.key && labelEditing ? (
-                  <Input
-                    ref={inputRef}
-                    value={currentChat?.label}
-                    onChange={handleLableChange}
-                    style={{
-                      height: 20,
-                      background: 'transparent',
-                      color: '#fff',
-                      width: 160
-                    }}
-                  />
-                ) : item?.label}
+            {chatItems.map(item => (
+              <div className={styles.chatItemActionWrap} key={item.key}>
+                <div
+                  className={`${styles.chatItem} ${currentChat.key === item.key ? styles.chatItemSelected : ''}`}
+                  onClick={() => setCurrentChat(item)}
+                >
+                  <span className={styles.icon}>
+                    <Image
+                      src={messagePic}
+                      alt="message"
+                      width={16}
+                      height={16}
+                    />
+                  </span>
+                  <span className={styles.labelWrap}>
+                    {currentChat.key === item.key && labelEditing ? (
+                      <Input
+                        ref={inputRef}
+                        value={currentChat?.label}
+                        onChange={handleLableChange}
+                        style={{
+                          height: 20,
+                          background: 'transparent',
+                          color: '#fff',
+                          width: 160
+                        }}
+                      />
+                    ) : item?.label}
+                  </span>
+                </div>
                 {currentChat.key === item.key && (
                   labelEditing ? (
-                    <Space style={{ position: 'absolute', right: 12 }}>
+                    <Space className={styles.actionWrap}>
                       <CheckOutlined onClick={handleLabelEditOk} />
                       <CloseOutlined onClick={handleLabelEditCancel} />
                     </Space>
                   ) : (
-                    <Space style={{ position: 'absolute', right: 12 }}>
+                    <Space className={styles.actionWrap}>
                       <EditOutlined onClick={() => handleEditTrigger(true)} />
                       <DeleteOutlined onClick={() => handlChatDel(item)} />
                     </Space>
                   )
                 )}
-              </span>
               </div>
-           ))}
+            ))}
           </div>
         </div>
       </Sider>
@@ -331,7 +324,7 @@ export default function Chat() {
               onChange={handlePromptChange}
               onPressEnter={handleSend}
             />
-            <SendOutlined onClick={handleSend}/>
+            <SendOutlined onClick={handleSend} />
           </div>
         </div>
       </Content>
