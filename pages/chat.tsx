@@ -5,11 +5,12 @@ import {
   Input,
   Space,
   Modal,
-  message,
+  message
 } from 'antd'
 import type { InputRef } from 'antd'
-import { EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, SendOutlined } from '@ant-design/icons'
+import { EditOutlined, DeleteOutlined, CheckOutlined, CloseOutlined, SendOutlined, MenuOutlined } from '@ant-design/icons'
 import { nanoid } from 'nanoid'
+import useMedia from '../hooks/useMedia'
 import askPic from '../public/ask.png'
 import replyPic from '../public/reply.svg'
 import messagePic from '../public/message.svg'
@@ -73,7 +74,6 @@ export default function Chat() {
   }
 
   const handleNewChat = () => {
-    debugger
     setCurrentChat({
       key: nanoid(),
       conversations: []
@@ -225,68 +225,85 @@ export default function Chat() {
         }
       })
   }
+  const renderSideContent = () => {
+    return <div className={styles.nav}>
+      <div className={styles.newBtn} onClick={handleNewChat}>
+        + New Chat
+      </div>
+      <div className={styles.chatList}>
+        {chatItems.map(item => (
+          <div className={styles.chatItemActionWrap} key={item.key}>
+            <div
+              className={`${styles.chatItem} ${currentChat.key === item.key ? styles.chatItemSelected : ''}`}
+              onClick={() => setCurrentChat(item)}
+            >
+              <span className={styles.icon}>
+                <Image
+                  src={messagePic}
+                  alt="message"
+                  width={16}
+                  height={16}
+                />
+              </span>
+              <span className={styles.labelWrap}>
+                {currentChat.key === item.key && labelEditing ? (
+                  <Input
+                    ref={inputRef}
+                    value={currentChat?.label}
+                    onChange={handleLableChange}
+                    style={{
+                      height: 20,
+                      background: 'transparent',
+                      color: '#fff',
+                      width: 160
+                    }}
+                  />
+                ) : item?.label}
+              </span>
+            </div>
+            {currentChat.key === item.key && (
+              labelEditing ? (
+                <Space className={styles.actionWrap}>
+                  <CheckOutlined onClick={handleLabelEditOk} />
+                  <CloseOutlined onClick={handleLabelEditCancel} />
+                </Space>
+              ) : (
+                <Space className={styles.actionWrap}>
+                  <EditOutlined onClick={() => handleEditTrigger(true)} />
+                  <DeleteOutlined onClick={() => handlChatDel(item)} />
+                </Space>
+              )
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  }
+  const isMobile = useMedia('(max-width: 600px)', false)
+  const [siderOpen, setSiderOpen] = useState(false)
+  const handleSiderClose = () => {
+    setSiderOpen(false)
+  }
 
   return (
     <Layout style={{ height: '100vh' }}>
-      <Sider width={260} style={{ background: '#202123' }}>
-        <div className={styles.nav}>
-          <div className={styles.newBtn} onClick={handleNewChat}>
-            + New Chat
-          </div>
-          <div className={styles.chatList}>
-            {chatItems.map(item => (
-              <div className={styles.chatItemActionWrap} key={item.key}>
-                <div
-                  className={`${styles.chatItem} ${currentChat.key === item.key ? styles.chatItemSelected : ''}`}
-                  onClick={() => setCurrentChat(item)}
-                >
-                  <span className={styles.icon}>
-                    <Image
-                      src={messagePic}
-                      alt="message"
-                      width={16}
-                      height={16}
-                    />
-                  </span>
-                  <span className={styles.labelWrap}>
-                    {currentChat.key === item.key && labelEditing ? (
-                      <Input
-                        ref={inputRef}
-                        value={currentChat?.label}
-                        onChange={handleLableChange}
-                        style={{
-                          height: 20,
-                          background: 'transparent',
-                          color: '#fff',
-                          width: 160
-                        }}
-                      />
-                    ) : item?.label}
-                  </span>
-                </div>
-                {currentChat.key === item.key && (
-                  labelEditing ? (
-                    <Space className={styles.actionWrap}>
-                      <CheckOutlined onClick={handleLabelEditOk} />
-                      <CloseOutlined onClick={handleLabelEditCancel} />
-                    </Space>
-                  ) : (
-                    <Space className={styles.actionWrap}>
-                      <EditOutlined onClick={() => handleEditTrigger(true)} />
-                      <DeleteOutlined onClick={() => handlChatDel(item)} />
-                    </Space>
-                  )
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </Sider>
+      {!isMobile && <Sider width={260} style={{ background: '#202123' }}>
+        {renderSideContent()}
+      </Sider>}
       <Content style={{ height: '100%', overflowY: 'scroll' }}>
         <div className={styles.contentWrap}>
-          {!(currentChat.conversations?.length > 0) && (
+          {!isMobile && !(currentChat.conversations?.length > 0) && (
             <div className={styles.headTitle}>ChatGPT</div>
           )}
+          {isMobile && <div className={styles.mobileTopArea}>
+            <MenuOutlined onClick={() => setSiderOpen(true)} />
+            <div className={styles.mobileTopHeadTitle}>ChatGPT</div>
+          </div>}
+          {siderOpen && isMobile && <div style={{ position: 'fixed', zIndex: 1, left: 0, width: 260, height: '100vh', background: '#202123' }}>
+            {renderSideContent()}
+          </div>}
+          {/* 浮层，用于捕获事件 */}
+          {siderOpen && isMobile && <div style={{ position: 'fixed', zIndex: 0, left: 0, width: '100vw', height: '100vh' }} onClick={handleSiderClose}></div>}
           {currentChat.conversations?.map(conversation => (
             <div className={styles.converation} key={conversation.id}>
               <div className={styles.itemWrap} style={{ background: '#fff' }}>
@@ -315,9 +332,9 @@ export default function Chat() {
               </div>
             </div>
           ))}
-          <div className={styles.bottomInput}>
+          <div className={isMobile ? styles.mobileBottomInput : styles.bottomInput}>
             <Input.TextArea
-              style={{ width: 768, marginRight: 5 }}
+              style={{ width: isMobile ? '95%' : 768, marginRight: 5 }}
               autoSize
               ref={textAreaRef}
               value={prompt}
